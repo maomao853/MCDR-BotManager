@@ -12,11 +12,17 @@ from mcdreforged.api.rtext import *
 from mcdreforged.api.decorator import new_thread
 
 PLUGIN_METADATA = {
-    'id': 'bot_kikai',
-    'version': '0.0.1',
-    'name': '假人器械映射',  # RText component is allowed
-    'description': '储存假人位置朝向信息并提供昵称映射和简化指令',  # RText component is allowed
-    'author': 'Jerry-FaGe',
+    'id': 'bot_manager',
+    'version': '1.0.0',
+    'name': 'Bot Manager', # RText component is allowed
+    'description': {
+        'en_us': 'Store and manage carpet bots facilitating command input',
+        'zh_cn': '储存假人位置朝向信息并提供昵称映射和简化指令'
+    }, # RText component is allowed
+    'author': [
+        'Jerry-FaGe',
+        'maomao853'
+    ],
     'link': 'https://github.com/Jerry-FaGe/MCDR-BotKikai',
     'dependencies': {
         'mcdreforged': '>=1.0.0',
@@ -25,8 +31,7 @@ PLUGIN_METADATA = {
 }
 
 config_path = './config/BotKikai.json'
-prefix_short = '!!bk'
-prefix = '!!botkikai'
+prefix = '!!bot'
 permission_bot = 1  # 操作假人(spawn,use,kill)的最低权限  guest: 0, user: 1, helper: 2, admin: 3, owner: 4
 permission_list = 3  # 操作假人列表(add,remove)的最低权限  guest: 0, user: 1, helper: 2, admin: 3, owner: 4
 dimension_convert = {
@@ -48,43 +53,81 @@ dimension_convert = {
 }
 bot_dic = {}
 bot_list = []
+
+# Help message
 help_msg = '''
-================== §bBotKikai §r==================
-§6欢迎使用由@Jerry-FaGe开发的假人器械映射插件！
-§6你可以在Github搜索MCDR-BotKikai找到本项目！
-「君は道具ではなく、その名が似合う人になろんだ」
-本插件中§d{prefix_short}§r与§d{prefix}§r效果相同，两者可以互相替换
-§b{prefix_short} §r显示本帮助信息
-§b{prefix_short} list §r显示假人列表
-§b{prefix_short} reload §r重载插件配置
-§b{prefix_short} add <name> <kikai> §r使用当前玩家参数添加一个名为<name>用于<kikai>的假人
-§b{prefix_short} add <name> <kikai> <dim> <pos> <facing> §r使用自定义参数添加一个名为<name>用于<kikai>的假人
-§b{prefix_short} del <kikai> §r从假人列表移除用于<kikai>的假人
-§b{prefix_short} <kikai> §r输出一个可点击的界面，自动根据假人是否在线改变选项
-§b{prefix_short} <kikai> spawn §r召唤一个用于<kikai>的假人
-§b{prefix_short} <kikai> kill §r干掉用于<kikai>的假人
-§b{prefix_short} <kikai> use §r假人右键一次§r（执行此条前无需执行spawn，如假人不在线会自动上线）
-'''.format(prefix=prefix, prefix_short=prefix_short)
+========== §bBot Manager §r==========
+一个帮助§6管理§r和§6控制§rcarpet假人的插件
+§d【使用说明】
+§b{prefix} §r显示本帮助信息
+§b{prefix} list §r显示假人列表
+§b{prefix} reload §r重载插件配置
+§b{prefix} add <name> <desc> §r使用当前玩家参数添加一个名为<name>用于<desc>的假人
+§b{prefix} add <name> <desc> <dim> <pos> <facing> §r使用自定义参数添加一个名为<name>用于<desc>的假人
+§b{prefix} del <desc> §r从假人列表移除用于<desc>的假人
+§b{prefix} <name> §r输出一个可点击的界面，自动根据假人是否在线改变选项
+§b{prefix} <name> spawn §r召唤一个用于<desc>的假人
+§b{prefix} <name> kill §r干掉用于<desc>的假人
+§b{prefix} <name> use §r假人右键一次§r（执行此条前无需执行spawn，如假人不在线会自动上线）
+'''.format(prefix=prefix)
+
+help_msg_en = '''
+========== §bBot Manager §r==========
+A plugin that helps §6manage §rand §6control §rcarpet bots.
+§d[Commands]
+§b{prefix} §r显示本帮助信息
+§b{prefix} list §r显示假人列表
+§b{prefix} reload §r重载插件配置
+§b{prefix} add <name> <desc> §r使用当前玩家参数添加一个名为<name>用于<desc>的假人
+§b{prefix} add <name> <desc> <dim> <pos> <facing> §r使用自定义参数添加一个名为<name>用于<desc>的假人
+§b{prefix} del <desc> §r从假人列表移除用于<desc>的假人
+§b{prefix} <name> §r输出一个可点击的界面，自动根据假人是否在线改变选项
+§b{prefix} <name> spawn §r召唤一个用于<desc>的假人
+§b{prefix} <name> kill §r干掉用于<desc>的假人
+§b{prefix} <name> use §r假人右键一次§r（执行此条前无需执行spawn，如假人不在线会自动上线）
+'''.format(prefix=prefix)
+
+# Help message separated
 help_head = """
-================== §bBotKikai §r==================
-§6欢迎使用由@Jerry-FaGe开发的假人器械映射插件！
-§6你可以在Github搜索MCDR-BotKikai找到本项目！
-「君は道具ではなく、その名が似合う人になろんだ」
-本插件中§d{prefix_short}§r与§d{prefix}§r效果相同，两者可以互相替换
-""".format(prefix=prefix, prefix_short=prefix_short)
+========== §bBot Manager §r==========
+一个帮助§6管理§r和§6控制§rcarpet假人的插件
+"""
+
+help_head_en = """
+========== §bBot Manager §r==========
+A plugin that helps §6manage §rand §6control §rcarpet bots.
+"""
+
 help_body = {
-    f"§b{prefix_short}": "§r显示本帮助信息",
-    f"§b{prefix_short} list": "§r显示假人列表",
-    f"§b{prefix_short} reload": "§r重载插件配置",
-    f"§b{prefix_short} add <name> <kikai>": "§r使用当前玩家参数添加一个名为<name>用于<kikai>的假人",
-    f"§b{prefix_short} add <name> <kikai> <dim> <pos> <facing>": "§r使用自定义参数添加一个名为<name>用于<kikai>的假人",
-    f"§b{prefix_short} del <kikai>": "§r从假人列表移除用于<kikai>的假人",
-    f"§b{prefix_short} <kikai>": "§r输出一个可点击的界面，自动根据假人是否在线改变选项",
-    f'§b{prefix_short} <kikai> spawn': "§r召唤一个用于<kikai>的假人",
-    f"§b{prefix_short} <kikai> kill": "§r干掉用于<kikai>的假人",
-    f"§b{prefix_short} <kikai> use": "§r假人右键一次§r（执行此条前无需执行spawn，如假人不在线会自动上线）",
-    f"§b{prefix_short} <kikai> huse": "§r假人持续右键(内测)§r（执行此条前无需执行spawn，如假人不在线会自动上线）",
-    f"§b{prefix_short} <kikai> hatk": "§r假人持续左键(内测)§r（执行此条前无需执行spawn，如假人不在线会自动上线）",
+    f"§d【使用说明】": "",
+    f"§b{prefix}": "§r显示本帮助信息",
+    f"§b{prefix} list": "§r显示假人列表",
+    f"§b{prefix} reload": "§r重载插件配置",
+    f"§b{prefix} add <name> <desc>": "§r使用当前玩家参数添加一个名为<name>用于<desc>的假人",
+    f"§b{prefix} add <name> <desc> <dim> <pos> <facing>": "§r使用自定义参数添加一个名为<name>用于<desc>的假人",
+    f"§b{prefix} del <desc>": "§r从假人列表移除用于<desc>的假人",
+    f"§b{prefix} <name>": "§r输出一个可点击的界面，自动根据假人是否在线改变选项",
+    f'§b{prefix} <name> spawn': "§r召唤一个用于<desc>的假人",
+    f"§b{prefix} <name> kill": "§r干掉用于<desc>的假人",
+    f"§b{prefix} <name> use": "§r假人右键一次§r（执行此条前无需执行spawn，如假人不在线会自动上线）",
+    f"§b{prefix} <name> huse": "§r假人持续右键(内测)§r（执行此条前无需执行spawn，如假人不在线会自动上线）",
+    f"§b{prefix} <name> hattack": "§r假人持续左键(内测)§r（执行此条前无需执行spawn，如假人不在线会自动上线）",
+}
+
+help_body_en = {
+    f"§d[Commands]": "",
+    f"§b{prefix}": "§r显示本帮助信息",
+    f"§b{prefix} list": "§r显示假人列表",
+    f"§b{prefix} reload": "§r重载插件配置",
+    f"§b{prefix} add <name> <desc>": "§r使用当前玩家参数添加一个名为<name>用于<desc>的假人",
+    f"§b{prefix} add <name> <desc> <dim> <pos> <facing>": "§r使用自定义参数添加一个名为<name>用于<desc>的假人",
+    f"§b{prefix} del <desc>": "§r从假人列表移除用于<desc>的假人",
+    f"§b{prefix} <name>": "§r输出一个可点击的界面，自动根据假人是否在线改变选项",
+    f'§b{prefix} <name> spawn': "§r召唤一个用于<desc>的假人",
+    f"§b{prefix} <name> kill": "§r干掉用于<desc>的假人",
+    f"§b{prefix} <name> use": "§r假人右键一次§r（执行此条前无需执行spawn，如假人不在线会自动上线）",
+    f"§b{prefix} <name> huse": "§r假人持续右键(内测)§r（执行此条前无需执行spawn，如假人不在线会自动上线）",
+    f"§b{prefix} <name> hattack": "§r假人持续左键(内测)§r（执行此条前无需执行spawn，如假人不在线会自动上线）",
 }
 
 
@@ -154,15 +197,17 @@ def hold_use(name):
 def operate_bot(server, info, args):
     global bot_dic, bot_list
     permission = server.get_permission_level(info)
+
     if len(args) == 1:
+        # !!bot
         # server.reply(info, help_msg)
         head = [help_head]
         body = [RText(f'{k} {v}\n').c(
             RAction.suggest_command, k.replace('§b', '')).h(v)
                 for k, v in help_body.items()]
         server.reply(info, RTextList(*(head + body)))
-
     elif len(args) == 2:
+        # !!bot list
         if args[1] == "list":
             c = ['']
             for name, bot_info in bot_dic.items():
@@ -180,11 +225,11 @@ def operate_bot(server, info, args):
                         #     '点击显示可识别坐标点'),
                         # f'§7Facing:§6 {bot_info["facing"]}\n',
                         RText('§d[点击use]  ').c(
-                            RAction.run_command, f'{prefix_short} {name} use').h(f'§6{name}§7右键一次'),
+                            RAction.run_command, f'{prefix} {name} use').h(f'§6{name}§7右键一次'),
                         RText('§d[点击下线]  ').c(
-                            RAction.run_command, f'{prefix_short} {name} kill ').h(f'下线§6{name}'),
+                            RAction.run_command, f'{prefix} {name} kill ').h(f'下线§6{name}'),
                         RText('§d[查看详情]  ').c(
-                            RAction.run_command, f'{prefix_short} {name}').h(f'显示§6{name}§r的详细信息')
+                            RAction.run_command, f'{prefix} {name}').h(f'显示§6{name}§r的详细信息')
                     )
                 else:
                     bot_msg = RTextList(
@@ -200,22 +245,22 @@ def operate_bot(server, info, args):
                         #     '点击显示可识别坐标点'),
                         # f'§7Facing:§6 {bot_info["facing"]}\n',
                         RText('§d[点击召唤]  ').c(
-                            RAction.run_command, f'{prefix_short} {name} spawn').h(f'召唤§6{name}'),
+                            RAction.run_command, f'{prefix} {name} spawn').h(f'召唤§6{name}'),
                         RText('§d[点击use]  ').c(
-                            RAction.run_command, f'{prefix_short} {name} use ').h(f'召唤§6{name}§r并右键一次'),
+                            RAction.run_command, f'{prefix} {name} use ').h(f'召唤§6{name}§r并右键一次'),
                         RText('§d[查看详情]  ').c(
-                            RAction.run_command, f'{prefix_short} {name}').h(f'显示§6{name}§r的详细信息')
+                            RAction.run_command, f'{prefix} {name}').h(f'显示§6{name}§r的详细信息')
                     )
                 c.append(bot_msg)
             server.reply(info, RTextList(*c))
-
+        # !!bot reload
         elif args[1] == "reload":
             try:
                 read()
                 server.say('§b[BotKikai]§a由玩家§d{}§a发起的BotKikai重载成功'.format(info.player))
             except Exception as e:
                 server.say('§b[BotKikai]§4由玩家§d{}§4发起的BotKikai重载失败：{}'.format(info.player, e))
-
+        # !!bot <Name>
         elif search(args[1]):
             name = search(args[1])
             if name not in bot_list:
@@ -232,9 +277,9 @@ def operate_bot(server, info, args):
                         '点击显示可识别坐标点'),
                     f'§7朝向:§6 {bot_dic.get(name)["facing"]}\n',
                     RText('§d[点击召唤]  ').c(
-                        RAction.run_command, f'{prefix_short} {name} spawn').h(f'召唤§6{name}'),
+                        RAction.run_command, f'{prefix} {name} spawn').h(f'召唤§6{name}'),
                     RText('§d[点击use]  ').c(
-                        RAction.run_command, f'{prefix_short} {name} use ').h(f'召唤§6{name}并右键一次')
+                        RAction.run_command, f'{prefix} {name} use ').h(f'召唤§6{name}并右键一次')
                 )
             else:
                 msg = RTextList(
@@ -250,16 +295,16 @@ def operate_bot(server, info, args):
                         '点击显示可识别坐标点'),
                     f'§7朝向:§6 {bot_dic.get(name)["facing"]}\n',
                     RText('§d[点击use]  ').c(
-                        RAction.run_command, f'{prefix_short} {name} use').h(f'§6{name}§7右键一次'),
+                        RAction.run_command, f'{prefix} {name} use').h(f'§6{name}§7右键一次'),
                     RText('§d[点击下线]  ').c(
-                        RAction.run_command, f'{prefix_short} {name} kill ').h(f'下线§6{name}')
+                        RAction.run_command, f'{prefix} {name} kill ').h(f'下线§6{name}')
                 )
             server.reply(info, msg)
-
+        # Invalid command
         else:
             server.reply(info, f"§b[BotKikai]§4未查询到§d{args[1]}§4对应的假人")
-
     elif len(args) == 3:
+        # !!bot del <Name>
         if args[1] == "del" and permission >= permission_list:
             name = search(args[2])
             if name:
@@ -269,22 +314,23 @@ def operate_bot(server, info, args):
                 server.reply(info, f'§b[BotKikai]§a已删除机器人{name}')
             else:
                 server.reply(info, f"§b[BotKikai]§4未查询到§d{args[1]}§4对应的假人")
-
+        # !!bot <Name> <command>
         else:
             name = search(args[1])
             if name:
+                # !!bot <Name> spawn
                 if args[2] == "spawn" and permission >= permission_bot:
                     if name not in bot_list:
                         server.execute(spawn(server, info, name))
                         server.reply(info, f"§b[BotKikai]§a已创建假人§d{name}§6（{args[1]}）")
                     else:
                         server.reply(info, f"§b[BotKikai]§4假人§d{name}§6（{args[1]}）§4已经在线")
-
+                # !!bot <Name> kill
                 elif args[2] == "kill" and permission >= permission_bot:
                     if name in bot_list:
                         server.execute(kill(name))
                         server.reply(info, f"§b[BotKikai]§a假人§d{name}§6（{args[1]}）§a已被下线")
-
+                # !!bot <Name> use
                 elif args[2] == "use" and permission >= permission_bot:
                     if name not in bot_list:
                         server.execute(spawn(server, info, name))
@@ -292,7 +338,7 @@ def operate_bot(server, info, args):
                         time.sleep(2)
                     server.execute(use(name))
                     server.reply(info, f"§b[BotKikai]§a假人§d{name}§6（{args[1]}）§a右键一次")
-
+                # !!bot <Name> huse
                 elif args[2] == "huse" and permission >= permission_bot:
                     if name not in bot_list:
                         server.execute(spawn(server, info, name))
@@ -300,21 +346,21 @@ def operate_bot(server, info, args):
                         time.sleep(2)
                     server.execute(hold_use(name))
                     server.reply(info, f"§b[BotKikai]§a假人§d{name}§6（{args[1]}）§a持续右键")
-
-                elif args[2] == "hatk" and permission >= permission_bot:
+                # !!bot <Name> hattack
+                elif args[2] == "hattack" and permission >= permission_bot:
                     if name not in bot_list:
                         server.execute(spawn(server, info, name))
                         server.reply(info, f"§b[BotKikai]§a已自动创建假人§d{name}§6（{args[1]}）")
                         time.sleep(2)
                     server.execute(hold_attack(name))
                     server.reply(info, f"§b[BotKikai]§a假人§d{name}§6（{args[1]}）§a持续左键")
-
+                # Invalid command
                 else:
-                    server.reply(info, f"§b[BotKikai]§4参数输入错误，输入§6{prefix_short}§4查看帮助信息")
+                    server.reply(info, f"§b[BotKikai]§4参数输入错误，输入§6{prefix}§4查看帮助信息")
             else:
                 server.reply(info, f"§b[BotKikai]§4未查询到§d{args[1]}§4对应的假人")
-
     elif len(args) == 4:
+        # !!bot add <Name> <Description>
         if args[1] == 'add' and permission >= permission_list:
             nick_ls = [] if bot_dic.get(args[2], None) is None else bot_dic.get(args[2])['nick']
             if args[2] not in nick_ls:
@@ -329,10 +375,11 @@ def operate_bot(server, info, args):
             }
             save()
             server.reply(info, f'§b[BotKikai]§a已添加假人{args[2]}')
+        # Invalid command
         else:
             server.reply(info, '§b[BotKikai]§4命令格式不正确或权限不足')
-
     elif len(args) == 10:
+        # !!bot add <Name> <Description> <Dim> <Pos-x,y,z> <Facing-yaw,pitch>
         if args[1] == 'add' and permission >= permission_list:
             if args[4] in dimension_convert.keys():
                 dim = dimension_convert[args[4]]
@@ -358,8 +405,8 @@ def operate_bot(server, info, args):
 
 def on_load(server, old):
     global bot_list
-    server.register_help_message(f'{prefix_short}', RText(
-        '假人器械映射').c(RAction.run_command, f'{prefix_short}').h('点击查看帮助'))
+    server.register_help_message(f'{prefix}', RText(
+        '假人器械映射').c(RAction.run_command, f'{prefix}').h('点击查看帮助'))
     if old is not None and old.bot_list is not None:
         bot_list = old.bot_list
     else:
@@ -389,7 +436,7 @@ def on_player_left(server, player):
 
 def on_info(server, info):
     if info.is_user:
-        if info.content.startswith(prefix) or info.content.startswith(prefix_short):
+        if info.content.startswith(prefix) or info.content.startswith(prefix):
             info.cancel_send_to_server()
             args = info.content.split(' ')
             operate_bot(server, info, args)
@@ -398,4 +445,3 @@ def on_info(server, info):
 def on_server_stop(server, return_code):
     global bot_list
     bot_list = []
-
