@@ -7,7 +7,6 @@ Created on 2021/3/2
 """
 import os
 import json
-import time
 from mcdreforged.api.rtext import *
 from mcdreforged.api.decorator import new_thread
 
@@ -30,7 +29,7 @@ PLUGIN_METADATA = {
     }
 }
 
-config_path = './config/BotKikai.json'
+config_path = './config/BotManager.json'
 prefix = '!!bot'
 permission_bot = 1  # 操作假人(spawn,use,kill)的最低权限  guest: 0, user: 1, helper: 2, admin: 3, owner: 4
 permission_list = 3  # 操作假人列表(add,remove)的最低权限  guest: 0, user: 1, helper: 2, admin: 3, owner: 4
@@ -76,9 +75,9 @@ help_body = {
     f"§b{prefix} <name>": "§r输出一个可点击的界面，自动根据假人是否在线改变选项",
     f'§b{prefix} <name> spawn': "§r召唤一个名为<name>的假人",
     f"§b{prefix} <name> kill": "§r干掉名为<name>的假人",
-    f"§b{prefix} <name> use": "§r假人右键一次§r（执行此条前无需执行spawn，如假人不在线会自动上线）",
-    f"§b{prefix} <name> huse": "§r假人持续右键(内测)§r（执行此条前无需执行spawn，如假人不在线会自动上线）",
-    f"§b{prefix} <name> hattack": "§r假人持续左键(内测)§r（执行此条前无需执行spawn，如假人不在线会自动上线）",
+    f"§b{prefix} <name> use": "§r假人右键一次",
+    f"§b{prefix} <name> huse": "§r假人持续右键(内测)",
+    f"§b{prefix} <name> hattack": "§r假人持续左键(内测)",
 }
 
 help_body_en = {
@@ -272,38 +271,35 @@ def operate_bot(server, info, args):
                 if args[2] == "spawn" and permission >= permission_bot:
                     if name not in bot_list:
                         server.execute(spawn(server, info, name))
-                        server.reply(info, f"§b[BotKikai]§a已创建假人§d{name}§6（{args[1]}）")
+                        server.reply(info, f"§b[BotKikai]§a已创建假人§d{name}")
                     else:
-                        server.reply(info, f"§b[BotKikai]§4假人§d{name}§6（{args[1]}）§4已经在线")
+                        server.reply(info, f"§b[BotKikai]§4假人§d{name}§4已经在线")
                 # !!bot <Name> kill
                 elif args[2] == "kill" and permission >= permission_bot:
                     if name in bot_list:
                         server.execute(kill(name))
-                        server.reply(info, f"§b[BotKikai]§a假人§d{name}§6（{args[1]}）§a已被下线")
+                        server.reply(info, f"§b[BotKikai]§a假人§d{name}§a已被下线")
                 # !!bot <Name> use
                 elif args[2] == "use" and permission >= permission_bot:
-                    if name not in bot_list:
-                        server.execute(spawn(server, info, name))
-                        server.reply(info, f"§b[BotKikai]§a已自动创建假人§d{name}§6（{args[1]}）")
-                        time.sleep(2)
-                    server.execute(use(name))
-                    server.reply(info, f"§b[BotKikai]§a假人§d{name}§6（{args[1]}）§a右键一次")
+                    if name in bot_list:
+                        server.execute(use(name))
+                        server.reply(info, f"§b[BotKikai]§a假人§d{name}§a右键一次")
+                    else:
+                        server.reply(info, f"§b[BotKikai]§a假人§d{name}§a目前没在线")
                 # !!bot <Name> huse
                 elif args[2] == "huse" and permission >= permission_bot:
-                    if name not in bot_list:
-                        server.execute(spawn(server, info, name))
-                        server.reply(info, f"§b[BotKikai]§a已自动创建假人§d{name}§6（{args[1]}）")
-                        time.sleep(2)
-                    server.execute(hold_use(name))
-                    server.reply(info, f"§b[BotKikai]§a假人§d{name}§6（{args[1]}）§a持续右键")
+                    if name in bot_list:
+                        server.execute(hold_use(name))
+                        server.reply(info, f"§b[BotKikai]§a假人§d{name}§a持续右键")
+                    else:
+                        server.reply(info, f"§b[BotKikai]§a假人§d{name}§a目前没在线")
                 # !!bot <Name> hattack
                 elif args[2] == "hattack" and permission >= permission_bot:
-                    if name not in bot_list:
-                        server.execute(spawn(server, info, name))
-                        server.reply(info, f"§b[BotKikai]§a已自动创建假人§d{name}§6（{args[1]}）")
-                        time.sleep(2)
-                    server.execute(hold_attack(name))
-                    server.reply(info, f"§b[BotKikai]§a假人§d{name}§6（{args[1]}）§a持续左键")
+                    if name in bot_list:
+                        server.execute(hold_attack(name))
+                        server.reply(info, f"§b[BotKikai]§a假人§d{name}§a持续左键")
+                    else:
+                        server.reply(info, f"§b[BotKikai]§a假人§d{name}§a目前没在线")
                 # Invalid command
                 else:
                     server.reply(info, f"§b[BotKikai]§4参数输入错误，输入§6{prefix}§4查看帮助信息")
