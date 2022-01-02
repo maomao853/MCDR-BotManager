@@ -55,39 +55,6 @@ bot_dic = {}
 bot_list = []
 
 # Help message
-help_msg = '''
-========== §bBot Manager §r==========
-一个帮助§6管理§r和§6控制§rcarpet假人的插件
-§d【使用说明】
-§b{prefix} §r显示本帮助信息
-§b{prefix} list §r显示假人列表
-§b{prefix} reload §r重载插件配置
-§b{prefix} add <name> <desc> §r使用当前玩家参数添加一个名为<name>用于<desc>的假人
-§b{prefix} add <name> <desc> <dim> <pos> <facing> §r使用自定义参数添加一个名为<name>用于<desc>的假人
-§b{prefix} del <desc> §r从假人列表移除用于<desc>的假人
-§b{prefix} <name> §r输出一个可点击的界面，自动根据假人是否在线改变选项
-§b{prefix} <name> spawn §r召唤一个用于<desc>的假人
-§b{prefix} <name> kill §r干掉用于<desc>的假人
-§b{prefix} <name> use §r假人右键一次§r（执行此条前无需执行spawn，如假人不在线会自动上线）
-'''.format(prefix=prefix)
-
-help_msg_en = '''
-========== §bBot Manager §r==========
-A plugin that helps §6manage §rand §6control §rcarpet bots.
-§d[Commands]
-§b{prefix} §r显示本帮助信息
-§b{prefix} list §r显示假人列表
-§b{prefix} reload §r重载插件配置
-§b{prefix} add <name> <desc> §r使用当前玩家参数添加一个名为<name>用于<desc>的假人
-§b{prefix} add <name> <desc> <dim> <pos> <facing> §r使用自定义参数添加一个名为<name>用于<desc>的假人
-§b{prefix} del <desc> §r从假人列表移除用于<desc>的假人
-§b{prefix} <name> §r输出一个可点击的界面，自动根据假人是否在线改变选项
-§b{prefix} <name> spawn §r召唤一个用于<desc>的假人
-§b{prefix} <name> kill §r干掉用于<desc>的假人
-§b{prefix} <name> use §r假人右键一次§r（执行此条前无需执行spawn，如假人不在线会自动上线）
-'''.format(prefix=prefix)
-
-# Help message separated
 help_head = """
 ========== §bBot Manager §r==========
 一个帮助§6管理§r和§6控制§rcarpet假人的插件
@@ -105,10 +72,10 @@ help_body = {
     f"§b{prefix} reload": "§r重载插件配置",
     f"§b{prefix} add <name> <desc>": "§r使用当前玩家参数添加一个名为<name>用于<desc>的假人",
     f"§b{prefix} add <name> <desc> <dim> <pos> <facing>": "§r使用自定义参数添加一个名为<name>用于<desc>的假人",
-    f"§b{prefix} del <desc>": "§r从假人列表移除用于<desc>的假人",
+    f"§b{prefix} del <name>": "§r从假人列表移除名为<name>的假人",
     f"§b{prefix} <name>": "§r输出一个可点击的界面，自动根据假人是否在线改变选项",
-    f'§b{prefix} <name> spawn': "§r召唤一个用于<desc>的假人",
-    f"§b{prefix} <name> kill": "§r干掉用于<desc>的假人",
+    f'§b{prefix} <name> spawn': "§r召唤一个名为<name>的假人",
+    f"§b{prefix} <name> kill": "§r干掉名为<name>的假人",
     f"§b{prefix} <name> use": "§r假人右键一次§r（执行此条前无需执行spawn，如假人不在线会自动上线）",
     f"§b{prefix} <name> huse": "§r假人持续右键(内测)§r（执行此条前无需执行spawn，如假人不在线会自动上线）",
     f"§b{prefix} <name> hattack": "§r假人持续左键(内测)§r（执行此条前无需执行spawn，如假人不在线会自动上线）",
@@ -116,18 +83,18 @@ help_body = {
 
 help_body_en = {
     f"§d[Commands]": "",
-    f"§b{prefix}": "§r显示本帮助信息",
-    f"§b{prefix} list": "§r显示假人列表",
-    f"§b{prefix} reload": "§r重载插件配置",
-    f"§b{prefix} add <name> <desc>": "§r使用当前玩家参数添加一个名为<name>用于<desc>的假人",
-    f"§b{prefix} add <name> <desc> <dim> <pos> <facing>": "§r使用自定义参数添加一个名为<name>用于<desc>的假人",
-    f"§b{prefix} del <desc>": "§r从假人列表移除用于<desc>的假人",
-    f"§b{prefix} <name>": "§r输出一个可点击的界面，自动根据假人是否在线改变选项",
-    f'§b{prefix} <name> spawn': "§r召唤一个用于<desc>的假人",
-    f"§b{prefix} <name> kill": "§r干掉用于<desc>的假人",
-    f"§b{prefix} <name> use": "§r假人右键一次§r（执行此条前无需执行spawn，如假人不在线会自动上线）",
-    f"§b{prefix} <name> huse": "§r假人持续右键(内测)§r（执行此条前无需执行spawn，如假人不在线会自动上线）",
-    f"§b{prefix} <name> hattack": "§r假人持续左键(内测)§r（执行此条前无需执行spawn，如假人不在线会自动上线）",
+    f"§b{prefix}": "§rDiplay help message",
+    f"§b{prefix} list": "§rDisplay bot list",
+    f"§b{prefix} reload": "§rReload this plugin",
+    f"§b{prefix} add <name> <desc>": "§rAdd a bot called <Name> using the current player's location data with <desc> as description",
+    f"§b{prefix} add <name> <desc> <dim> <pos> <facing>": "§rAdd a bot called <Name> using the provide location data with <desc> as description",
+    f"§b{prefix} del <name>": "§rDelete the specified carpet bot",
+    f"§b{prefix} <name>": "§rDisplay an options menu for the specified carpet bot",
+    f'§b{prefix} <name> spawn': "§rSpawn the specified carpet bot",
+    f"§b{prefix} <name> kill": "§rKill the specified carpet bot",
+    f"§b{prefix} <name> use": "§rExecute the use action on the specified carpet bot",
+    f"§b{prefix} <name> huse": "§rExecute the hold-use action on the specified carpet bot",
+    f"§b{prefix} <name> hattack": "§rExecute the hold-attack action on the specified carpet bot",
 }
 
 
@@ -142,10 +109,10 @@ def save():
         json.dump(bot_dic, f, indent=4, ensure_ascii=False)
 
 
-def search(kikai):
-    for k, v in bot_dic.items():
-        if kikai in v['nick']:
-            return k
+def search(name):
+    for n, info in bot_dic.items():
+        if n == name:
+            return n
 
 
 def auth_player(player):
@@ -200,7 +167,6 @@ def operate_bot(server, info, args):
 
     if len(args) == 1:
         # !!bot
-        # server.reply(info, help_msg)
         head = [help_head]
         body = [RText(f'{k} {v}\n').c(
             RAction.suggest_command, k.replace('§b', '')).h(v)
@@ -216,14 +182,6 @@ def operate_bot(server, info, args):
                         '\n'
                         f'§7----------- §6{name} §a在线 §7 -----------\n',
                         f'§7此假人用于:§6 {bot_info["nick"]}\n',
-                        # f'§7Dimension:§6 {bot_info["dim"]}\n',
-                        # RText(
-                        #     f'§7Position:§6 {bot_info["pos"]}\n', ).c(
-                        #     RAction.run_command,
-                        #     '[x:{}, y:{}, z:{}, name:{}, dim{}]'.format(
-                        #         *[int(i) for i in bot_info['pos']], name, bot_info['dim'])).h(
-                        #     '点击显示可识别坐标点'),
-                        # f'§7Facing:§6 {bot_info["facing"]}\n',
                         RText('§d[点击use]  ').c(
                             RAction.run_command, f'{prefix} {name} use').h(f'§6{name}§7右键一次'),
                         RText('§d[点击下线]  ').c(
@@ -236,14 +194,6 @@ def operate_bot(server, info, args):
                         '\n'
                         f'§7----------- §6{name} §4离线 §7 -----------\n',
                         f'§7此假人用于:§6 {bot_info["nick"]}\n',
-                        # f'§7Dimension:§6 {bot_info["dim"]}\n',
-                        # RText(
-                        #     f'§7Position:§6 {bot_info["pos"]}\n', ).c(
-                        #     RAction.run_command,
-                        #     '[x:{}, y:{}, z:{}, name:{}, dim{}]'.format(
-                        #         *[int(i) for i in bot_info['pos']], name, bot_info['dim'])).h(
-                        #     '点击显示可识别坐标点'),
-                        # f'§7Facing:§6 {bot_info["facing"]}\n',
                         RText('§d[点击召唤]  ').c(
                             RAction.run_command, f'{prefix} {name} spawn').h(f'召唤§6{name}'),
                         RText('§d[点击use]  ').c(
