@@ -66,18 +66,18 @@ A plugin that helps §6manage §rand §6control §rcarpet bots.
 
 help_body = {
     f"§d【使用说明】": "",
-    f"§b{prefix}": "§r显示本帮助信息",
-    f"§b{prefix} list": "§r显示假人列表",
-    f"§b{prefix} reload": "§r重载插件配置",
-    f"§b{prefix} add <name> <desc>": "§r使用当前玩家参数添加一个名为<name>用于<desc>的假人",
-    f"§b{prefix} add <name> <desc> <dim> <pos> <facing>": "§r使用自定义参数添加一个名为<name>用于<desc>的假人",
-    f"§b{prefix} del <name>": "§r从假人列表移除名为<name>的假人",
-    f"§b{prefix} <name>": "§r输出一个可点击的界面，自动根据假人是否在线改变选项",
-    f'§b{prefix} <name> spawn': "§r召唤一个名为<name>的假人",
-    f"§b{prefix} <name> kill": "§r干掉名为<name>的假人",
-    f"§b{prefix} <name> use": "§r假人右键一次",
-    f"§b{prefix} <name> huse": "§r假人持续右键(内测)",
-    f"§b{prefix} <name> hattack": "§r假人持续左键(内测)",
+    f"§7{prefix}": "§f显示本帮助信息",
+    f"§7{prefix} list": "§f显示假人列表",
+    f"§7{prefix} reload": "§f重载插件配置",
+    f"§7{prefix} add <name> <desc>": "§f使用当前玩家参数添加一个名为<name>用于<desc>的假人",
+    f"§7{prefix} add <name> <desc> <dim> <pos> <facing>": "§f使用自定义参数添加一个名为<name>用于<desc>的假人",
+    f"§7{prefix} del <name>": "§f从假人列表移除名为<name>的假人",
+    f"§7{prefix} <name>": "§f输出一个可点击的界面，自动根据假人是否在线改变选项",
+    f'§7{prefix} <name> spawn': "§f召唤一个名为<name>的假人",
+    f"§7{prefix} <name> kill": "§f干掉名为<name>的假人",
+    f"§7{prefix} <name> use": "§f假人右键一次",
+    f"§7{prefix} <name> huse": "§f假人持续右键(内测)",
+    f"§7{prefix} <name> hattack": "§f假人持续左键(内测)",
 }
 
 help_body_en = {
@@ -180,24 +180,24 @@ def operate_bot(server, info, args):
                     bot_msg = RTextList(
                         '\n'
                         f'§7----------- §6{name} §a在线 §7 -----------\n',
-                        f'§7此假人用于:§6 {bot_info["nick"]}\n',
-                        RText('§d[点击use]  ').c(
-                            RAction.run_command, f'{prefix} {name} use').h(f'§6{name}§7右键一次'),
-                        RText('§d[点击下线]  ').c(
+                        f'§f此假人用于:§6 {bot_info["nick"]}\n',
+                        RText('§f[§c点击下线§f]  ').c(
                             RAction.run_command, f'{prefix} {name} kill ').h(f'下线§6{name}'),
-                        RText('§d[查看详情]  ').c(
+                        RText('§f[§e点击use§f]  ').c(
+                            RAction.run_command, f'{prefix} {name} use').h(f'§6{name}§7右键一次'),
+                        RText('§f[§e查看详情§f]  ').c(
                             RAction.run_command, f'{prefix} {name}').h(f'显示§6{name}§r的详细信息')
                     )
                 else:
                     bot_msg = RTextList(
                         '\n'
-                        f'§7----------- §6{name} §4离线 §7 -----------\n',
-                        f'§7此假人用于:§6 {bot_info["nick"]}\n',
-                        RText('§d[点击召唤]  ').c(
+                        f'§7----------- §6{name} §c离线 §7 -----------\n',
+                        f'§f此假人用于:§6 {bot_info["nick"]}\n',
+                        RText('§f[§a点击召唤§f]  ').c(
                             RAction.run_command, f'{prefix} {name} spawn').h(f'召唤§6{name}'),
-                        RText('§d[点击use]  ').c(
+                        RText('§f[§e点击use§f]  ').c(
                             RAction.run_command, f'{prefix} {name} use ').h(f'召唤§6{name}§r并右键一次'),
-                        RText('§d[查看详情]  ').c(
+                        RText('§f[§e查看详情§f]  ').c(
                             RAction.run_command, f'{prefix} {name}').h(f'显示§6{name}§r的详细信息')
                     )
                 c.append(bot_msg)
@@ -215,38 +215,38 @@ def operate_bot(server, info, args):
             if name not in bot_list:
                 msg = RTextList(
                     '\n'
-                    f'§7----------- §6{name} §4离线 §7-----------\n',
-                    f'§7此假人用于:§6 {bot_dic.get(name)["nick"]}\n',
-                    f'§7维度:§6 {bot_dic.get(name)["dim"]}\n',
+                    f'§7----------- §6{name} §c离线 §7-----------\n',
+                    f'§f此假人用于:§6 {bot_dic.get(name)["nick"]}\n',
+                    f'§f维度:§6 {bot_dic.get(name)["dim"]}\n',
                     RText(
-                        f'§7坐标:§6 {bot_dic.get(name)["pos"]}\n', ).c(
+                        f'§f坐标:§6 {bot_dic.get(name)["pos"]}\n', ).c(
                         RAction.run_command,
                         '[x:{}, y:{}, z:{}, name:{}, dim{}]'.format(
                             *[int(i) for i in bot_dic.get(name)['pos']], name, bot_dic.get(name)['dim'])).h(
                         '点击显示可识别坐标点'),
-                    f'§7朝向:§6 {bot_dic.get(name)["facing"]}\n',
-                    RText('§d[点击召唤]  ').c(
+                    f'§f朝向:§6 {bot_dic.get(name)["facing"]}\n',
+                    RText('§f[§a点击召唤§f]  ').c(
                         RAction.run_command, f'{prefix} {name} spawn').h(f'召唤§6{name}'),
-                    RText('§d[点击use]  ').c(
+                    RText('§f[§e点击use§f]  ').c(
                         RAction.run_command, f'{prefix} {name} use ').h(f'召唤§6{name}并右键一次')
                 )
             else:
                 msg = RTextList(
                     '\n'
                     f'§7----------- §6{name} §a在线 §7-----------\n',
-                    f'§7此假人用于:§6 {bot_dic.get(name)["nick"]}\n',
-                    f'§7维度:§6 {bot_dic.get(name)["dim"]}\n',
+                    f'§f此假人用于:§6 {bot_dic.get(name)["nick"]}\n',
+                    f'§f维度:§6 {bot_dic.get(name)["dim"]}\n',
                     RText(
-                        f'§7坐标:§6 {bot_dic.get(name)["pos"]}\n', ).c(
+                        f'§f坐标:§6 {bot_dic.get(name)["pos"]}\n', ).c(
                         RAction.run_command,
                         '[x:{}, y:{}, z:{}, name:{}, dim{}]'.format(
                             *[int(i) for i in bot_dic.get(name)['pos']], name, bot_dic.get(name)['dim'])).h(
                         '点击显示可识别坐标点'),
-                    f'§7朝向:§6 {bot_dic.get(name)["facing"]}\n',
-                    RText('§d[点击use]  ').c(
+                    f'§f朝向:§6 {bot_dic.get(name)["facing"]}\n',
+                    RText('§f[§c点击下线§f]  ').c(
+                        RAction.run_command, f'{prefix} {name} kill ').h(f'下线§6{name}'),
+                    RText('§f[§e点击use§f]  ').c(
                         RAction.run_command, f'{prefix} {name} use').h(f'§6{name}§7右键一次'),
-                    RText('§d[点击下线]  ').c(
-                        RAction.run_command, f'{prefix} {name} kill ').h(f'下线§6{name}')
                 )
             server.reply(info, msg)
         # Invalid command
